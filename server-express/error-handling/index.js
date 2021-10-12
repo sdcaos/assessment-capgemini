@@ -1,4 +1,4 @@
-module.exports = (app) => {
+const errorHandling = (app) => {
   app.use((req, res) => {
     // this middleware runs whenever requested page is not available
     res.status(404).render('not-found')
@@ -15,3 +15,5 @@ module.exports = (app) => {
     }
   })
 }
+
+export default errorHandling

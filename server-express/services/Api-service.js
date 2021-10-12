@@ -1,4 +1,4 @@
-const axios = require('axios')
+import axios from 'axios'
 
 class ApiService {
   constructor() {
@@ -8,4 +8,4 @@ class ApiService {
   }
 }
 
-module.exports = ApiService
+export default ApiService
