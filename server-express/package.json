@@ -12,7 +12,7 @@
     "debug": "nodemon",
     "lint": "eslint .",
     "lint-fix": "eslint --fix .",
-    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --detectOpenHandles"
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",

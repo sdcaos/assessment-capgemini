@@ -7,6 +7,7 @@ const errorHandling = (app) => {
   app.use((err, req, res) => {
     // whenever you call next(err), this middleware will handle the error
     // always logs the error
+    // eslint-disable-next-line no-console
     console.error('ERROR', req.method, req.path, err)
 
     // only render if the error ocurred before sending the response

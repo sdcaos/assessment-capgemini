@@ -1,18 +1,60 @@
 import express from 'express'
 import ApiHandler from '../services/Api-service.js'
 
+// import axios from 'axios'
+
 const router = express.Router()
-const ApiCall = new ApiHandler()
+let authorizationHeader = {}
 
-/* GET home page */
 router.post('/login', (req, res) => {
-  res.sendStatus(200)
+  const ApiCall = new ApiHandler()
+  const { username, password } = req.body
 
-  // const { user, password } = req.body
+  ApiCall.login(username, password)
+    .then((response) => {
+      authorizationHeader = {
+        Authorization: `${response.data.type} ${response.data.token}`,
+      }
 
-  // ApiCall.login(user, password)
-  //   .then((response) => res.status(200).json({ response }))
-  //   .catch((err) => res.status(500).json({ message: err }))
+      return res.status(200).json({ token: response.data })
+    })
+    .catch((error) => res.status(500).json({ error }))
+})
+
+router.get('/policies', (req, res) => {
+  const token = req.body
+
+  const ApiCall = new ApiHandler(token)
+
+  ApiCall.getPolicies()
+    .then((response) => {
+      authorizationHeader.etag = response.headers.etag
+
+      return res.status(200).json({
+        policies: response.data,
+        etag: response.config.headers.etag,
+      })
+    })
+
+    .catch((error) => res.status(500).json({ error }))
+})
+
+router.get('/clients', (req, res) => {
+  const token = req.body
+
+  const ApiCall = new ApiHandler(token)
+
+  ApiCall.getPolicies()
+    .then((response) => {
+      authorizationHeader.etag = response.headers.etag
+
+      return res.status(200).json({
+        clients: response.data,
+        etag: response.config.headers.etag,
+      })
+    })
+
+    .catch((error) => res.status(500).json({ error }))
 })
 
 export default router
