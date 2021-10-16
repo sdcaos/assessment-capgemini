@@ -1,8 +1,7 @@
-const config = (app, express, logger, cookieParser) => {
+const config = (app, express, logger) => {
   app.use(logger('dev'))
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
-  app.use(cookieParser())
 }
 
 export default config

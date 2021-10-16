@@ -26,7 +26,7 @@ describe('POST /login', () => {
 
       if (response.body.token) {
         authToken = {
-          Authorization: `Bearer ${response.body.token.token}`,
+          Authorization: `Bearer ${response.body.token}`,
         }
       }
 
@@ -34,14 +34,39 @@ describe('POST /login', () => {
     })
   })
 
-  // describe('when the username and password are missing', () => {
+  describe('POST /login', () => {
+    describe('when the username and password are missing', () => {
+      test('it should return status 400 missing parameters', async () => {
 
-  // })
+        const response = await supertest(app).post('/login').send({
+          username: 'dare',
+        })
+
+        expect(response.statusCode).toBe(400)
+      })
+
+      describe('when the username and password are wrong', () => {
+        test('it should return status 401 Unauthorized', async () => {
+          const response = await supertest(app).post('/login').send({
+            username: 'dare',
+            password: 'xxx',
+          })
+
+          // console.log('--->', response)
+
+          expect(response.statusCode).toBe(401)
+        })
+
+      })
+    })
+  })
+
 })
+
 
 describe('GET /policies', () => {
   describe('calling this endpoint', () => {
-    test('should return an array of policies objects', async () => {
+    test('it should return an array of policies objects', async () => {
       const response = await supertest(app).get(`/policies`).send(authToken)
 
       if (response.body.etag) authToken.etag = response.body.etag
@@ -57,7 +82,7 @@ describe('GET /policies', () => {
 
 describe('GET /clients', () => {
   describe('calling this endpoint', () => {
-    test('should return an array of clients objects', async () => {
+    test('it should return an array of clients objects', async () => {
       const response = await supertest(app).get(`/clients`).send(authToken)
 
       expect(response.statusCode).toBe(200)
