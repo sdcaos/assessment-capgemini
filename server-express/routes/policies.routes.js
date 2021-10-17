@@ -9,8 +9,10 @@ const router = express.Router()
 router.get('/', (req, res) => {
   if (!req.headers.authorization) return res.status(401).json({ Message: 'Unauthorized, log in first --' })
 
-  const { limit } = req.query
+  let { limit } = req.query
+  if (!limit) limit = 10
   const token = req.headers.authorization?.split(' ')[1]
+
 
   if (token in authUsers) {
     const { headers } = authUsers[token]
