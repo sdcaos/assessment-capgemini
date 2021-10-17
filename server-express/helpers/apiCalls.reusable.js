@@ -1,10 +1,7 @@
-
-
-export const findClients = (ApiService) => {
-
-    return ApiService.getClients()
-        .then(response => response.data)
-        .catch(err => console.log(err))
-
-
+const findClients = (ApiService) => {
+  return ApiService.getClients()
+    .then((response) => response.data)
+    .catch((err) => err)
 }
+
+export default findClients

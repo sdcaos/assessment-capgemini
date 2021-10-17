@@ -37,7 +37,6 @@ describe('POST /login', () => {
   describe('POST /login', () => {
     describe('when the username and password are missing', () => {
       test('it should return status 400 missing parameters', async () => {
-
         const response = await supertest(app).post('/login').send({
           username: 'dare',
         })
@@ -56,13 +55,10 @@ describe('POST /login', () => {
 
           expect(response.statusCode).toBe(401)
         })
-
       })
     })
   })
-
 })
-
 
 describe('GET /policies', () => {
   describe('calling this endpoint', () => {

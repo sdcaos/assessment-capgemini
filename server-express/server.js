@@ -15,10 +15,7 @@ app.use(cors())
 routes(app)
 // app.use('/', index)
 
-
-
 errorHandling(app)
-
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(5000, () => {

@@ -18,6 +18,12 @@ function App() {
       .then((response) => console.log(response.data))
       .catch((err) => console.log(err))
   }
+  const clientsId = () => {
+    const Api = new ApiService(token)
+    Api.getClientsId()
+      .then((response) => console.log(response.data))
+      .catch((err) => console.log(err))
+  }
 
   return (
     <div className="App">
@@ -26,6 +32,9 @@ function App() {
       </button>
       <button type="button" onClick={clients}>
         clients
+      </button>
+      <button type="button" onClick={clientsId}>
+        clients Per Id
       </button>
     </div>
   )

@@ -1,74 +1,99 @@
-import { findClients } from "./apiCalls.reusable.js"
+import findClients from './apiCalls.reusable.js'
+import ApiService from '../services/Api-service.js'
+import authUsers from './authUsers.js'
 
-export let authUsers = {}
+const helperFunctions = {
 
-export const inputIsMailOrEmail = (username) => {
-    const emailRegex = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})*$/
+    inputIsMailOrEmail(username) {
+        const emailRegex = /^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})*$/
+        const simpleStringRegex = /^[a-zA-Z0-9]*$/
 
-    if (username.match(/^[a-zA-Z0-9]*$/)) return 'name'
+        let nameOrEmail
 
-    if (username.match(emailRegex)) return 'email'
-}
+        if (username.match(simpleStringRegex)) nameOrEmail = 'name'
 
-export const findCurrentUserDetails = async (token, ApiService) => {
+        if (username.match(emailRegex)) nameOrEmail = 'email'
 
-    const searchKey = inputIsMailOrEmail(authUsers[token].name)
+        return nameOrEmail
+    },
 
-    const clients = await findClients(ApiService)
-        .then(clients => clients)
-        .catch(err => err)
+    async findCurrentUserDetails(token, ApiCall) {
+        const searchKey = inputIsMailOrEmail(authUsers[token].name)
+        let currentUser
 
-    if (clients) {
+        const clientsData = await findClients(ApiCall)
+            .then((clients) => clients)
+            .catch((err) => err)
 
-        const userName = authUsers[token].name
-        const currentUser = clients.filter(client => client[searchKey] === userName)
-
+        if (clientsData) {
+            const userName = authUsers[token].name
+            currentUser = clientsData.filter((client) => client[searchKey] === userName)
+        }
         return currentUser.length ? currentUser[0] : null
+    },
 
-    }
-}
+    filterClientsByName(clients, name) {
+        return clients.filter((client) => client.name.toLowerCase() === name.toLowerCase())
+    },
 
-const filterClientsByName = (clients, name) => {
+    filterClientsByLimit(clients, limit) {
+        const filteredClients = clients.filter(
+            function () {
+                if (this.count <= limit) {
+                    this.count += 1
+                    return true
+                }
+                return false
+            },
+            { count: 0 },
+        )
+        return filteredClients
+    },
 
-    return clients.filter(client => client.name === name)
+    filterClientsByLimitOrName(clients, limit, name) {
+        let clientsFiltered
 
-}
+        if (name) clientsFiltered = filterClientsByName(clients, name)
 
+        console.log(clientsFiltered)
 
-const filterClientsByLimit = (clients, limit) => {
+        if (limit) clientsFiltered = filterClientsByLimit(clientsFiltered.length ? clientsFiltered : clients, limit)
 
-    return clients.filter(function () {
+        return clientsFiltered
+    },
 
-        if (this.count <= limit) {
-            this.count += 1
-            return true
+    setUserData(token, name, password, usedCredentials) {
+        authUsers[token] = {
+            name,
+            password,
+            usedCredentials,
+            headers: { authorization: `Bearer ${token}` },
+        }
+    },
+
+    async refreshUserToken(token, res) {
+        const ApiCall = new ApiService()
+
+        if (token in authUsers) {
+            return ApiCall.login(authUsers[token].name, authUsers[token].password)
+                .then((response) => {
+                    authUsers[token].headers = {
+                        Authorization: `Bearer ${response.data.token}`,
+                    }
+
+                    return res.header({ Authorization: `Bearer ${token}` }).redirect('/clients')
+                })
+                .catch((err) => err)
         }
 
-    }, { count: 0 })
-
-}
-
-
-export const filterClientsByLimitOrName = (clients, limit, name) => {
-
-    let clientsFiltered
-
-    if (name) clientsFiltered = filterClientsByName(clients, name)
-
-    if (limit) clientsFiltered = filterClientsByLimit(clients, limit)
-
-    return clientsFiltered
-
-}
+        return { statusCode: 404, message: 'User not found, try to log in' }
+    },
 
 
+    filterClientById() {
 
-export const setUserData = (token, name, password, identifier) => {
-
-    authUsers[token] = {
-        name: name,
-        password: password,
-        identifier
     }
 
 }
+
+export default helperFunctions
