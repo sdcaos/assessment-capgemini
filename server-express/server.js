@@ -23,6 +23,5 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`Server listening on port http://localhost:5000`)
   })
 }
-// require('./error-handling')(app)
 
 export default app
