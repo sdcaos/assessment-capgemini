@@ -44,7 +44,7 @@ const helpObj = {
         }
         return false
       },
-      { count: 0 },
+      { count: 1 },
     )
     return filteredClients
   },
@@ -76,8 +76,8 @@ const helpObj = {
     return { statusCode: 404, message: 'User not found, try to log in' }
   },
 
-  filterById: (id, array) => {
-    return array.filter((elm) => elm.id === id)[0]
+  filterById: (id, array, idToCheck = 'id') => {
+    return array.filter((elm) => elm[idToCheck] === id)
   },
 
   findUserPolicies: async (currentUser, ApiCall, limit) => {
@@ -93,19 +93,17 @@ const helpObj = {
   insertPolicies: async (clients, ApiCall) => {
     const policies = await findPolicies(ApiCall)
 
+    const clientsCopy = [...clients]
 
-    clients.forEach(client => {
-      client.policies = []
+    clientsCopy.forEach((client, i) => {
+      clientsCopy[i].policies = []
 
-      policies.forEach(policy => {
-        client.id === policy.clientId ? client.policies.push(policy) : null
+      policies.forEach((policy) => {
+        if (client.id === policy.clientId) client.policies.push(policy)
       })
-
-    });
-    return clients
-
-
-  }
+    })
+    return clientsCopy
+  },
 }
 
 export default helpObj

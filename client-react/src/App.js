@@ -36,6 +36,12 @@ function App() {
       .then((response) => console.log(response.data))
       .catch((err) => console.log(err))
   }
+  const clientIdPolicies = () => {
+    const Api = new ApiService(token)
+    Api.getClientPolicies()
+      .then((response) => console.log(response.data))
+      .catch((err) => console.log(err))
+  }
 
   return (
     <div className="App">
@@ -53,6 +59,9 @@ function App() {
       </button>
       <button type="button" onClick={policiesId}>
         Policies PER ID
+      </button>
+      <button type="button" onClick={clientIdPolicies}>
+        Client Id Policies
       </button>
     </div>
   )

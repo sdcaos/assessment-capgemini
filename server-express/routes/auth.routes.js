@@ -10,7 +10,7 @@ router.post('/login', (req, res) => {
 
   if (!username || !password) return res.status(400).json({ message: 'Missing parameters' })
 
-  ApiCall.login(username, password)
+  return ApiCall.login(username, password)
     .then((response) => {
       helpObj.setUserData(response.data.token, username, password, helpObj.inputIsNameOrEmail(username))
 

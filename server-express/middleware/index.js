@@ -2,13 +2,13 @@ import helpObj from '../helpers/functions.helpers.js'
 
 const middleware = {
   isClientUser: async (token, ApiCall) => {
-    const currentUser = await helpObj
+    const currentUserData = await helpObj
       .findCurrentUserDetails(token, ApiCall)
       .then((currentUser) => currentUser)
       .catch((err) => err)
 
     // if the user role is simple user return just hes own userdata
-    if (currentUser?.role === 'user') return currentUser
+    if (currentUserData?.role === 'user') return currentUserData
 
     return false
   },

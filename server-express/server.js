@@ -5,7 +5,7 @@ import logger from 'morgan'
 import config from './config/index.js'
 // import index from './routes/index.js'
 import errorHandling from './error-handling/index.js'
-import { routes } from './routes/index.routes.js'
+import routes from './routes/index.routes.js'
 
 const app = express()
 config(app, express, logger)

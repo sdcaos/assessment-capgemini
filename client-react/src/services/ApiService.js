@@ -27,6 +27,8 @@ class ApiService {
   getPolicies = () => this.app.get('/policies')
 
   getPoliciesId = () => this.app.get('/policies/64cceef9-3a01-49ae-a23b-3761b604800b')
+
+  getClientPolicies = () => this.app.get('clients/a0ece5db-cd14-4f21-812f-966633e7be86/policies')
 }
 
 export default ApiService

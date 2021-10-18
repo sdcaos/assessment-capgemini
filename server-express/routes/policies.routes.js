@@ -10,14 +10,14 @@ router.get('/', (req, res) => {
   if (!req.headers.authorization) return res.status(401).json({ Message: 'Unauthorized, log in first --' })
 
   let { limit } = req.query
-  if (!limit) limit = 9
+  if (!limit) limit = 10
   const token = req.headers.authorization?.split(' ')[1]
 
   if (token in authUsers) {
     const { headers } = authUsers[token]
     const ApiCall = new ApiService(headers)
 
-    ApiCall.getPolicies()
+    return ApiCall.getPolicies()
       .then(async (response) => {
         const currentUserPolicies = await middleware.isUserPolicies(token, ApiCall)
 
@@ -33,11 +33,10 @@ router.get('/', (req, res) => {
           return helpObj.refreshUserToken(token, res, '/policies')
         }
 
-        res.status(500).json({ error })
+        return res.status(500).json({ error })
       })
-  } else {
-    res.status(401).json({ Message: 'Unauthorized, log in first' })
   }
+  return res.status(401).json({ Message: 'Unauthorized, log in first' })
 })
 
 router.get('/:id', (req, res) => {
@@ -53,29 +52,31 @@ router.get('/:id', (req, res) => {
     const ApiCall = new ApiService(headers)
 
     // if client role is user, return its own user
-    ApiCall.getPolicies()
+    return ApiCall.getPolicies()
       .then(async (response) => {
         const currentUserPolicies = await middleware.isUserPolicies(token, ApiCall)
 
         if (currentUserPolicies.length) {
           const policy = helpObj.filterById(id, currentUserPolicies)
-          return res.status(200).json({ policy })
+          return res.status(200).json({ policy: policy[0] })
         }
 
         const policy = helpObj.filterById(id, response.data)
 
-        return !policy.length ? res.status(404).json({ message: 'user not found' }) : res.status(200).json({ policy })
+        return !policy.length
+          ? res.status(404).json({ message: 'user not found' })
+          : res.status(200).json({ policy: policy[0] })
       })
 
       .catch((error) => {
+        // refresh token
         if (error.response?.data.message === 'Authorization token expired') {
           return helpObj.refreshUserToken(token, res, `/policies/${id}`)
         }
-        res.status(500).json({ error })
+        return res.status(500).json({ error })
       })
-  } else {
-    res.status(401).json({ Message: 'Unauthorized, log in first' })
   }
+  return res.status(401).json({ Message: 'Unauthorized, log in first' })
 })
 
 export default router
