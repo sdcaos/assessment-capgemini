@@ -10,9 +10,8 @@ router.get('/', (req, res) => {
   if (!req.headers.authorization) return res.status(401).json({ Message: 'Unauthorized, log in first --' })
 
   let { limit } = req.query
-  if (!limit) limit = 10
+  if (!limit) limit = 9
   const token = req.headers.authorization?.split(' ')[1]
-
 
   if (token in authUsers) {
     const { headers } = authUsers[token]
@@ -64,7 +63,8 @@ router.get('/:id', (req, res) => {
         }
 
         const policy = helpObj.filterById(id, response.data)
-        return res.status(200).json({ policy })
+
+        return !policy.length ? res.status(404).json({ message: 'user not found' }) : res.status(200).json({ policy })
       })
 
       .catch((error) => {

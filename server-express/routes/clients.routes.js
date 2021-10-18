@@ -1,7 +1,6 @@
 import express from 'express'
 import ApiService from '../services/Api-service.js'
 import helpObj from '../helpers/functions.helpers.js'
-import { findClients } from '../helpers/apiCalls.reusable.js'
 import authUsers from '../helpers/authUsers.js'
 import middleware from '../middleware/index.js'
 
@@ -12,7 +11,7 @@ router.get('/', (req, res) => {
 
   let { limit, name } = req.query
 
-  if (!limit) limit = 10
+  if (!limit) limit = 9
 
   const token = req.headers.authorization?.split(' ')[1]
 
@@ -26,28 +25,30 @@ router.get('/', (req, res) => {
     middleware
       .isClientUser(token, ApiCall)
       .then((currentUser) => {
-        if (currentUser) return res.status(200).json(currentUser)
+        if (currentUser) return res.status(200).json({ currentUser })
+
+        return ApiCall.getClients()
+
       })
-      .catch((err) => res.status(500).json({ message: 'Error finding currentUser', err }))
-
-
-    ApiCall.getClients()
-      .then((clients) => {
+      .then(async (clients) => {
         let clientsFiltered
 
+        // filter by name and limit
         if (name) clientsFiltered = helpObj.filterClientsByName(clients.data, name)
 
         if (limit) clientsFiltered = helpObj.filterByLimit(clientsFiltered || clients.data, limit)
 
-        return res.status(200).json({ clientsFiltered })
+        // insert policies in clients (populate)
+        return helpObj.insertPolicies(clientsFiltered, ApiCall)
+          .then(clientsCompleteData => res.status(200).json({ clientsCompleteData }))
+          .catch(err => res.status(500).json({ message: 'Error fetching Clients', err }))
       })
       .catch((err) => {
         // if the token expired refresh it
         if (err.response?.data.message === 'Authorization token expired') {
           return helpObj.refreshUserToken(token, res, '/clients')
         }
-
-        res.status(500).json({ message: 'Error fetching clients', err })
+        res.status(500).json({ message: 'Error finding currentUser', err })
       })
   } else {
     res.status(401).json({ Message: 'Unauthorized, log in first' })
@@ -74,7 +75,6 @@ router.get('/:id', (req, res) => {
 
     ApiCall.getClients()
       .then((response) => {
-
         const client = helpObj.filterById(id, response.data)
         res.status(200).json(client)
       })

@@ -12,7 +12,7 @@ router.post('/login', (req, res) => {
 
   ApiCall.login(username, password)
     .then((response) => {
-      helpObj.setUserData(response.data.token, username, password, helpObj.inputIsMailOrEmail(username))
+      helpObj.setUserData(response.data.token, username, password, helpObj.inputIsNameOrEmail(username))
 
       response.data.expires_in = 900000
 
