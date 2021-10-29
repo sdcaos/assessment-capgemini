@@ -36,6 +36,8 @@ const helpObj = {
   },
 
   filterByLimit: (array, limit) => {
+
+
     const filteredClients = array.filter(
       function () {
         if (this.count <= limit) {
@@ -47,7 +49,19 @@ const helpObj = {
       { count: 1 },
     )
     return filteredClients
+
   },
+
+
+  // filterByLimit: (array, limit) => {
+
+  //   const filteredClients
+
+  //   array.forEach((elm, i) => {
+  //     if (i <= limit) filteredClients.push(elm)
+  //   })
+  //   return filteredClients
+  // },
 
   setUserData: (token, name, password, usedCredentials) => {
     authUsers[token] = {

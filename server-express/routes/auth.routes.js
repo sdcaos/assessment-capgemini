@@ -4,27 +4,32 @@ import helpObj from '../helpers/functions.helpers.js'
 
 const router = express.Router()
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const ApiCall = new ApiService()
   const { username, password } = req.body
 
   if (!username || !password) return res.status(400).json({ message: 'Missing parameters' })
 
-  return ApiCall.login(username, password)
-    .then((response) => {
-      helpObj.setUserData(response.data.token, username, password, helpObj.inputIsNameOrEmail(username))
+  try {
 
-      response.data.expires_in = 900000
+    const response = await ApiCall.login(username, password)
 
-      return res.status(200).json(response.data)
-    })
-    .catch((error) => {
-      if (error.response?.data.message === 'invalid secret or client id') {
-        return res.status(401).json({ message: error.response.data.message })
-      }
+    helpObj.setUserData(response.data.token, username, password, helpObj.inputIsNameOrEmail(username))
 
-      return res.status(500).json({ error })
-    })
+    response.data.expires_in = 900000
+
+    return res.status(200).json(response.data)
+
+  } catch (error) {
+
+    return error.response?.data.statusCode === 401
+      ?
+      res.status(401).json({ message: error.response.data.message })
+      :
+      res.status(500).json({ error })
+
+  }
+
 })
 
 export default router
