@@ -20,15 +20,13 @@ const helpObj = {
     const searchKey = helpObj.inputIsNameOrEmail(authUsers[token].name)
     let currentUser
 
-    const clientsData = await findClients(ApiCall)
-      .then((clients) => clients)
-      .catch((err) => err)
+    const clientsData = await findClients(ApiCall, authUsers[token].headers)
 
     if (clientsData) {
       const userName = authUsers[token].name
       currentUser = clientsData.filter((client) => client[searchKey] === userName)
     }
-    return currentUser.length ? currentUser[0] : null
+    return currentUser?.length ? currentUser[0] : null
   },
 
   filterClientsByName: (clients, name) => {
@@ -118,6 +116,13 @@ const helpObj = {
     })
     return clientsCopy
   },
+
+  substractToken: (req) => {
+
+    return req.headers.authorization?.split(' ')[1]
+  }
+
+
 }
 
 export default helpObj

@@ -1,18 +1,16 @@
 import express from 'express'
 import ApiService from '../services/Api-service.js'
 import helpObj from '../helpers/functions.helpers.js'
-
 const router = express.Router()
 
 router.post('/login', async (req, res) => {
-  const ApiCall = new ApiService()
   const { username, password } = req.body
 
   if (!username || !password) return res.status(400).json({ message: 'Missing parameters' })
 
   try {
 
-    const response = await ApiCall.login(username, password)
+    const response = await ApiService.login(username, password)
 
     helpObj.setUserData(response.data.token, username, password, helpObj.inputIsNameOrEmail(username))
 

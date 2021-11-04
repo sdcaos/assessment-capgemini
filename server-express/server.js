@@ -1,16 +1,11 @@
 import 'dotenv/config'
-import cors from 'cors'
 import express from 'express'
-import logger from 'morgan'
 import config from './config/index.js'
 // import index from './routes/index.js'
 import routes from './routes/index.routes.js'
 
 const app = express()
-config(app, express, logger)
-
-app.use(cors())
-
+config(app, express)
 routes(app)
 // app.use('/', index)
 

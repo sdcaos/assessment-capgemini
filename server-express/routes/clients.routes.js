@@ -13,75 +13,77 @@ router.get('/', async (req, res) => {
   let { limit } = req.query
   if (!limit) limit = 10
 
-  const token = req.headers.authorization?.split(' ')[1]
+  const token = helpObj.substractToken(req)
 
-  if (token in authUsers) {
+  if (!token in authUsers) return res.status(401).json({ Message: 'Unauthorized, log in first' })
 
-    try {
+  try {
 
-      const { headers } = authUsers[token]
-      const ApiCall = new ApiService(headers)
+    const { headers } = authUsers[token]
 
-      const isCurrentUser = await middleware.isClientUser(token, ApiCall)
+    const isCurrentUser = await middleware.isClientUser(token, ApiService)
 
-      if (isCurrentUser) return res.status(200).json({ currentUser })
+    console.log(isCurrentUser)
 
-      const clients = await ApiCall.getClients()
+    if (isCurrentUser) return res.status(200).json({ isCurrentUser })
 
-      let clientsFiltered
+    const clients = await ApiService.getClients(headers)
 
-      if (name) clientsFiltered = helpObj.filterClientsByName(clients.data, name)
+    console.log(clients)
 
-      clientsFiltered = helpObj.filterByLimit(clientsFiltered || clients.data, limit)
+    let clientsFiltered
 
-      return res.status(200).json(clientsFiltered)
+    if (name) clientsFiltered = helpObj.filterClientsByName(clients.data, name)
 
-    } catch (error) {
+    clientsFiltered = helpObj.filterByLimit(clientsFiltered || clients.data, limit)
 
-      if (error.response.data.statusCode === 401) return helpObj.refreshUserToken(token, res, '/clients')
+    return res.status(200).json(clientsFiltered)
 
-      return res.status(500).json({ message: 'Error finding currentUser', err })
+  } catch (error) {
 
-    }
+    if (error.response?.data.statusCode === 401) return helpObj.refreshUserToken(token, res, '/clients')
+
+    return res.status(500).json({ message: 'Error finding currentUser', error })
 
   }
-  return res.status(401).json({ Message: 'Unauthorized, log in first' })
-
 })
 
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   if (!req.headers.authorization) return res.status(401).json({ Message: 'Unauthorized, log in first --' })
 
-  const token = req.headers.authorization?.split(' ')[1]
+  const token = helpObj.substractToken(req)
 
   const { id } = req.params
 
-  if (token in authUsers) {
+  if (!token in authUsers) return res.status(401).json({ Message: 'Unauthorized, log in first' })
+
+  try {
     // get the headers from the user and call apihandler with this arg
     const { headers } = authUsers[token]
-    const ApiCall = new ApiService(headers)
 
     // if client role is user, return its own user
-    return middleware
-      .isClientUser(token, ApiCall)
-      .then((currentUser) => {
-        if (currentUser) return res.status(200).json(currentUser)
+    const clientUserData = await middleware.isClientUser(token, ApiService, headers)
 
-        return ApiCall.getClients()
-      })
-      .then((response) => {
-        const client = helpObj.filterById(id, response.data)
-        return res.status(200).json(client[0])
-      })
-      .catch((err) => {
-        if (err.response?.data.message === 'Authorization token expired') {
-          return helpObj.refreshUserToken(token, res, `/clients/${id}`)
-        }
-        return res.status(500).json({ message: 'error fetching clients' })
-      })
+    if (clientUserData) return res.status(200).json(currentUser)
+
+    const { data: clientsListData } = await ApiService.getClients(headers)
+
+    const client = helpObj.filterById(id, clientsListData)
+
+    return res.status(200).json(client[0])
+
+  } catch (error) {
+
+    if (error.response?.data.statusCode === 401) {
+
+      return helpObj.refreshUserToken(token, res, `/clients/${id}`)
+    }
+    return res.status(500).json({ message: 'error fetching clients' })
+
   }
-  return res.status(401).json({ Message: 'Unauthorized, log in first' })
+
 })
+
 
 router.get('/:id/policies', (req, res) => {
   if (!req.headers.authorization) return res.status(401).json({ Message: 'Unauthorized, log in first --' })
@@ -93,7 +95,7 @@ router.get('/:id/policies', (req, res) => {
   if (token in authUsers) {
     // get the headers from the user and call apihandler with this arg
     const { headers } = authUsers[token]
-    const ApiCall = new ApiService(headers)
+    // const ApiCall = new ApiService(headers)
 
     // if client role is user, return its own user
     return middleware

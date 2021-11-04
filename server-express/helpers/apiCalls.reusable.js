@@ -1,7 +1,19 @@
-export const findClients = (ApiService) => {
-  return ApiService.getClients()
-    .then((response) => response.data)
-    .catch((err) => err)
+
+
+export const findClients = async (ApiService, headers) => {
+
+  try {
+
+    const clients = await ApiService.getClients(headers)
+
+    return clients.length ? clients : null
+
+  } catch (error) {
+
+    throw error
+
+  }
+
 }
 
 export const findPolicies = (ApiService) => {

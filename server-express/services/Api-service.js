@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-class ApiService {
+class ApiHandler {
   constructor(userHeaders) {
     this.baseUrl = { baseURL: 'https://dare-nodejs-assessment.herokuapp.com/api' }
 
@@ -11,15 +11,16 @@ class ApiService {
     this.app = axios.create(this.baseUrl)
   }
 
-  login = (username, password) =>
+  login = (username, password,) =>
     this.app.post('/login', {
       client_id: username,
       client_secret: password,
     })
 
-  getClients = () => this.app.get(`/clients`)
+  getClients = (headers) => this.app.get(`/clients`, { headers })
 
-  getPolicies = () => this.app.get('/policies')
+  getPolicies = (headers) => this.app.get('/policies', { headers })
 }
 
+const ApiService = new ApiHandler()
 export default ApiService
